@@ -1,0 +1,10 @@
+**/__pycache__/
+*.pyc
+*.pyo
+.idea/
+
+/bot-app/bot_config.py
+/config.py
+/db/
+**/logs/
+/venv/
