@@ -1,0 +1,33 @@
+import logging
+
+from flask import Flask
+
+app = Flask(__name__)
+
+formatter = logging.Formatter(f"%(asctime)s %(name)s:%(levelname)s: %(message)s")
+
+# Moving thr latest logs to the archive
+for filename in ['errors', 'warning', 'debug']:
+    with open(f'logs/{filename}.log', 'r') as last, \
+         open(f'logs/archive/{filename}.log', 'a') as archive:
+        archive.write(last.read())
+
+error_handler = logging.FileHandler('logs/errors.log', 'w')
+error_handler.setLevel(logging.ERROR)
+error_handler.setFormatter(formatter)
+
+warning_handler = logging.FileHandler('logs/warning.log', 'w')
+warning_handler.setLevel(logging.WARNING)
+warning_handler.setFormatter(formatter)
+
+debug_handler = logging.FileHandler('logs/debug.log', 'w')
+debug_handler.setLevel(logging.DEBUG)
+debug_handler.setFormatter(formatter)
+
+logger = logging.getLogger()
+logger.setLevel(0)
+logger.addHandler(error_handler)
+logger.addHandler(warning_handler)
+logger.addHandler(debug_handler)
+
+from bot_app import views

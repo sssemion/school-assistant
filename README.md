@@ -1,6 +1,8 @@
 # school-assistant
 An assistant you won't forget about homework
 
+[Software requirements specification](https://docs.google.com/document/d/10-2b0d08dBXfpZ8_FU2gTfRhVtiyUkso0O42UgCanHc/edit?usp=sharing)
+
 _There will be the description of the project soon_
 
 ## Project structure  
@@ -8,7 +10,7 @@ _There will be the description of the project soon_
 `├── bot-app`  
 `│ ├── bot_config.py*`  
 `│ ├── data`  
-`│ │ ├── all_models.py`  
+`│ │ ├── __all_models.py`  
 `│ │ └── db_session.py`  
 `│ ├── db*`  
 `│ ├── __init__.py`  
@@ -19,7 +21,10 @@ _There will be the description of the project soon_
 `│ │ └── base.html`  
 `│ └── views.py`  
 `├── config.py*`  
+`├── logs*`  
+`│ ├── archive`  
 `├── README.md` < You are here  
 `└── requirements.txt`  
-\* Files **_bot-app/bot_config.py_**, **_config.py_** and directory **_db/_** are ignored by git 
-because they may contain confidential information, such as api-keys and user data
+`└── runner.py*`  
+\* Files **_bot-app/bot_config.py_**, **_config.py_**, **_runner.py_** and directories **_db/_**, 
+**_logs/_** are ignored by git because they may contain confidential information, such as api-keys and user data

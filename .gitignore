@@ -3,8 +3,9 @@
 *.pyo
 .idea/
 
-/bot-app/bot_config.py
+/bot_app/bot_config.py
 /config.py
+/runner.py
 /db/
 **/logs/
 /venv/
