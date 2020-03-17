@@ -2,6 +2,8 @@ import logging
 
 from flask import Flask
 
+from data import db_session
+
 app = Flask(__name__)
 
 formatter = logging.Formatter(f"%(asctime)s %(name)s:%(levelname)s: %(message)s")
@@ -30,4 +32,6 @@ logger.addHandler(error_handler)
 logger.addHandler(warning_handler)
 logger.addHandler(debug_handler)
 
-from bot_app import views
+db_session.global_init("bot_app/db/school_assistant.sqlite")
+
+from bot_app import controllers

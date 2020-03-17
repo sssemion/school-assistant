@@ -6,25 +6,36 @@ An assistant you won't forget about homework
 _There will be the description of the project soon_
 
 ## Project structure  
+
 `.`  
-`├── bot-app`  
-`│ ├── bot_config.py*`  
-`│ ├── data`  
-`│ │ ├── __all_models.py`  
-`│ │ └── db_session.py`  
-`│ ├── db*`  
-`│ ├── __init__.py`  
-`│ ├── static`  
-`│ │ ├── css`  
-`│ │ └── img`  
-`│ ├── templates`  
-`│ │ └── base.html`  
-`│ └── views.py`  
+`├── bot_app`  
+`│   ├── __init__.py`  
+`│   ├── bot_config.py*`  
+`│   ├── controllers.py`  
+`│   ├── data`  
+`│   │   ├── __all_models.py`  
+`│   │   ├── api_session.py`  
+`│   │   ├── db_session.py`  
+`│   │   ├── mark.py`  
+`│   │   ├── student.py`  
+`│   │   └── subject.py`  
+`│   ├── db*`  
+`│   │   └── school_assistant.sqlite`  
+`│   ├── form_models`  
+`│   │   ├── ReigsterForm.py`  
+`│   ├── services`  
+`│   │   ├── CRYPTO_KEYS.py*`    
+`│   │   ├── school_services.py`  
+`│   │   └── vk_services.py`  
+`│   ├── static`  
+`│   └── templates`  
+`│       ├── base.html`  
+`│       ├── register.html`  
+`│       └── success.html`  
 `├── config.py*`  
 `├── logs*`  
-`│ ├── archive`  
 `├── README.md` < You are here  
-`└── requirements.txt`  
+`├── requirements.txt`  
 `└── runner.py*`  
 \* Files **_bot-app/bot_config.py_**, **_config.py_**, **_runner.py_** and directories **_db/_**, 
 **_logs/_** are ignored by git because they may contain confidential information, such as api-keys and user data

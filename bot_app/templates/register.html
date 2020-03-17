@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% set title="Регистрация" %}
+
+{% block content %}
+    <div class="form-outer">
+        <h1>Регистрация</h1>
+        <h3>Введите логин и пароль от аккаунта электронного дневника</h3>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <p class="input-block">
+                {{ form.login.label }}<br>
+                {{ form.login(class="form-control") }}
+                {% for error in form.login.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p class="input-block">
+                {{ form.password.label }}<br>
+                {{ form.password(class="form-control", type="password") }}
+                {% for error in form.password.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            </p>
+            <p class="input-block">{{ form.agree() }} {{ form.agree.label }}</p>
+            <p class="input-block">{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+            {% if message %}
+                <p class="alert alert-danger" role="alert">{{message}}</p>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}
