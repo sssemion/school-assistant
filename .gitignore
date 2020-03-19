@@ -6,7 +6,7 @@
 /bot_app/bot_config.py
 /config.py
 /runner.py
-/db/
+/bot_app/db/
 **/logs/
 /venv/
 /bot_app/services/CRYPTO_KEYS.py

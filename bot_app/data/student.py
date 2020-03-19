@@ -8,6 +8,7 @@ class Student(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     vk_id = sqlalchemy.Column(sqlalchemy.Integer, unique=True)
+    school_id = sqlalchemy.Column(sqlalchemy.Integer, unique=True)
     login_data = sqlalchemy.Column(sqlalchemy.String)
     dialogue_point = sqlalchemy.Column(sqlalchemy.String)
     daily_hometask = sqlalchemy.Column(sqlalchemy.Boolean, default=False)

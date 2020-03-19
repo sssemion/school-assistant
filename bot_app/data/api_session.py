@@ -10,6 +10,6 @@ class ApiSession(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer, autoincrement=True, primary_key=True)
     student_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('students.id'))
     session_id = sqlalchemy.Column(sqlalchemy.String)
-    date = sqlalchemy.Column(sqlalchemy.DateTime)
+    expires = sqlalchemy.Column(sqlalchemy.DateTime)
 
     student = orm.relation('Student', foreign_keys=[student_id])
