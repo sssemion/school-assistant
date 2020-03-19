@@ -7,11 +7,6 @@ from form_models.ReigsterForm import RegisterForm
 from services import vk_services, school_services
 
 
-@app.route('/')
-def main_route():
-    return 'Hello, world!'
-
-
 @app.route('/vk', methods=["POST"])
 def vk_handler():
     json_request = request.get_json()

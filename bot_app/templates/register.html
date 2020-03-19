@@ -2,6 +2,8 @@
 
 {% set title="Регистрация" %}
 
+{% block stylesheet %}<link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">{% endblock %}
+
 {% block content %}
     <div class="form-outer">
         <h1>Регистрация</h1>
@@ -27,7 +29,7 @@
                     </p>
                 {% endfor %}
             </p>
-            <p class="input-block">{{ form.agree() }} {{ form.agree.label }}</p>
+            <p class="input-block">{{ form.agree() }} Я согласен с <a href="https://vk.com/topic-192755811_40405659">условиями</a></p>
             <p class="input-block">{{ form.submit(type="submit", class="btn btn-primary") }}</p>
             {% if message %}
                 <p class="alert alert-danger" role="alert">{{message}}</p>
