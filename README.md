@@ -5,6 +5,9 @@ An assistant you won't forget about homework
 
 _There will be the description of the project soon_
 
+version 0.1  
+This version of the bot can only send you homework if you will ask it to  
+
 ## Project structure  
 
 `.`  
