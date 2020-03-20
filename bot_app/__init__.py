@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask
 
-from data import db_session
+from bot_app.data import db_session
 
 app = Flask(__name__)
 

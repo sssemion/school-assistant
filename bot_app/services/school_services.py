@@ -5,12 +5,12 @@ from cryptography.fernet import Fernet
 from werkzeug.exceptions import abort
 
 from bot_app import logger
-from data.api_session import ApiSession
-from data.db_session import create_session
-from data.student import Student
-from data.subject import Subject
-from form_models.ReigsterForm import RegisterForm
-from services import vk_services
+from bot_app.data.api_session import ApiSession
+from bot_app.data.db_session import create_session
+from bot_app.data.student import Student
+from bot_app.data.subject import Subject
+from bot_app.form_models.ReigsterForm import RegisterForm
+from bot_app.services import vk_services
 from .CRYPTO_KEYS import *
 
 

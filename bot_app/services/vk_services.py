@@ -5,10 +5,10 @@ import random
 import pymorphy2
 import vk
 
-from bot_config import *
+from bot_app.bot_config import *
 from config import SERVER_NAME
-from data.db_session import create_session
-from data.student import Student
+from bot_app.data.db_session import create_session
+from bot_app.data.student import Student
 
 VK_SESSION = None
 VK_API = None
@@ -309,7 +309,7 @@ def end_config(vk_id):
 
 
 def main_point(data):
-    from services import school_services
+    from bot_app.services import school_services
     message = data.get('object').get('message')
     text = message.get('text')
     vk_id = message.get('from_id')

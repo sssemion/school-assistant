@@ -1,7 +1,7 @@
 import sqlalchemy
 
 from sqlalchemy import orm
-from data.db_session import SqlAlchemyBase
+from bot_app.data.db_session import SqlAlchemyBase
 
 class Student(SqlAlchemyBase):
     __tablename__ = 'students'

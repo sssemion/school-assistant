@@ -1,6 +1,6 @@
 import sqlalchemy
 
-from data.db_session import SqlAlchemyBase
+from bot_app.data.db_session import SqlAlchemyBase
 
 
 class Subject(SqlAlchemyBase):
