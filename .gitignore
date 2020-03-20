@@ -10,3 +10,7 @@
 **/logs/
 /venv/
 /bot_app/services/CRYPTO_KEYS.py
+
+.env
+.flaskenv
+certs/
