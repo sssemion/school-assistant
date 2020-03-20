@@ -6,7 +6,6 @@ import pymorphy2
 import vk
 
 from bot_app.bot_config import *
-from config import SERVER_NAME
 from bot_app.data.db_session import create_session
 from bot_app.data.student import Student
 
