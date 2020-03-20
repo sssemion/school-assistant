@@ -2,9 +2,9 @@ from flask import request, render_template
 from werkzeug.exceptions import abort
 
 from bot_app import app, logger
-from bot_config import *
-from form_models.ReigsterForm import RegisterForm
-from services import vk_services, school_services
+from bot_app.bot_config import *
+from bot_app.form_models.ReigsterForm import RegisterForm
+from bot_app.services import vk_services, school_services
 
 
 @app.route('/vk', methods=["POST"])
