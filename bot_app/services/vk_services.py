@@ -6,12 +6,11 @@ import pymorphy2
 import vk
 
 from bot_app.bot_config import *
-from config import SERVER_NAME
 from bot_app.data.db_session import create_session
 from bot_app.data.student import Student
 
-VK_SESSION = None
-VK_API = None
+VK_SESSION = vk.Session()
+VK_API = vk.API(VK_SESSION, v=5.103)
 
 DAILY_HOMETASK = 'daily_hometask'
 MAILING_TIME = 'mailing_time'
@@ -68,10 +67,6 @@ def handle_message(data):  # main function that receives and handle each message
     else:
         new_user = False
 
-    global VK_SESSION, VK_API
-    if VK_SESSION is None or VK_API is None:
-        VK_SESSION = vk.Session()
-        VK_API = vk.API(VK_SESSION, v=5.103)
 
     if new_user:
         return start(data)
@@ -91,6 +86,10 @@ def start(data):
     message = data.get('object').get('message')
     sender = message.get('from_id')
     text = message.get('text')
+    session = create_session()
+    student = Student(vk_id=sender, dialogue_point='register')
+    session.add(student)
+    session.commit()
     params = {
         'user_id': sender,
         'random_id': random.randint(1, 2 ** 32),

@@ -2,7 +2,6 @@ import datetime
 
 import requests
 from cryptography.fernet import Fernet
-from werkzeug.exceptions import abort
 
 from bot_app import logger
 from bot_app.data.api_session import ApiSession
@@ -28,8 +27,6 @@ def decrypt_logindata(logindata):
 def register(vk_id, form: RegisterForm) -> bool:
     # True, если регистрация завершена успешно, иначе - False
     db_session = create_session()
-    if db_session.query(Student).filter(Student.vk_id == vk_id).first() is not None:
-        abort(404)
     params = {
         'login': form.login.data,
         'password': form.password.data,
@@ -42,10 +39,10 @@ def register(vk_id, form: RegisterForm) -> bool:
     session_id = list(map(lambda x: x.split('='), r.headers['Set-Cookie'].split('; ')))[-3][-1]
     logindata = generate_logindata(form.login.data.encode('utf-8'),
                                    form.password.data.encode('utf-8'))
-    student = Student(vk_id=vk_id, school_id=school_id, login_data=logindata, dialogue_point='register')
-    db_session.add(student)
-    db_session.commit()
     student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
+    student.school_id = school_id
+    student.login_data = logindata
+    db_session.commit()
     api_session = ApiSession(student_id=student.id, session_id=session_id,
                              expires=datetime.datetime.now() + datetime.timedelta(hours=1))
     db_session.add(api_session)
@@ -81,7 +78,7 @@ def get_hometask(vk_id, date):
         if lesson['homework'] and lesson['homework'].lower() not in \
                 ['не предусмотрено', 'не предусмотрено; не предусмотрено']:
             ans[lesson['discipline']] = lesson['homework']
-        if (lesson['discipline'], ) not in db_session.query(Subject.name).all():
+        if (lesson['discipline'],) not in db_session.query(Subject.name).all():
             db_session.add(Subject(name=lesson['discipline']))
             db_session.commit()
     if ans == {}:

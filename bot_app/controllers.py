@@ -31,6 +31,16 @@ def vk_handler():
 
 @app.route('/register/<int:vk_id>', methods=['GET', 'POST'])
 def register(vk_id):
+    from bot_app.data.db_session import create_session
+    from bot_app.data.student import Student
+    session = create_session()
+    if session.query(Student).filter(Student.vk_id == vk_id).first() is None or \
+            session.query(Student).filter(Student.vk_id == vk_id).first().dialogue_point != 'register':
+        try:
+            logger.error(f"Registered user: {vk_id}. DP = {session.query(Student).filter(Student.vk_id == vk_id).first().dialogue_point}")
+        except AttributeError:
+            logger.error(f"Unrecognized user: {vk_id}")
+        abort(404)
     form = RegisterForm()
     if form.validate_on_submit():
         if not school_services.register(vk_id, form):

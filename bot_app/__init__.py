@@ -5,6 +5,7 @@ from flask import Flask
 from bot_app.data import db_session
 
 app = Flask(__name__)
+app.config.from_object('config')
 
 formatter = logging.Formatter(f"%(asctime)s %(name)s:%(levelname)s: %(message)s")
 
