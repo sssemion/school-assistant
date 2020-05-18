@@ -13,6 +13,7 @@ class Student(SqlAlchemyBase):
     login_data = sqlalchemy.Column(sqlalchemy.String)
     dialogue_point = sqlalchemy.Column(sqlalchemy.String)
     daily_hometask = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    last_mailing = sqlalchemy.Column(sqlalchemy.DateTime)
 
     sessions = orm.relation('ApiSession', back_populates='student', lazy='subquery')
 

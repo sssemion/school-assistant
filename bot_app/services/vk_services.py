@@ -147,11 +147,11 @@ def end_config(vk_id):
     params = {
         'user_id': vk_id,
         'random_id': random.randint(1, 2 ** 32),
-        'message': 'Еее, настройка завершена.',
+        'message': 'Настройка завершена.',
         'keyboard': MAIN_KEYBOARD,
         'access_token': VK_APIKEY,
     }
-    if student.daily_hometask or student.new_marks_alerts or student.new_marks_alerts:
+    if student.daily_hometask:
         params['message'] += ' Жди сообщений ;)'
     db_session.commit()
     return VK_API.messages.send(**params)
@@ -212,10 +212,12 @@ def parse_date(datestr):
     return None
 
 
-def format_hometask(hometask, date):
+def format_hometask(hometask, date, handle_errors=True):
     formatted_date = '.'.join(str(date.date()).split('-')[::-1])
     message = ''
     if hometask is None:
+        if not handle_errors:
+            return None
         message = 'Произошла какая-то ошибка. Попробуй позже'
     elif type(hometask) == dict:
         morph = pymorphy2.MorphAnalyzer()
@@ -224,5 +226,32 @@ def format_hometask(hometask, date):
         for subject, task in hometask.items():
             message += f'\n • {subject}:\n{task}\n'
     elif type(hometask) == str:
+        if not handle_errors:
+            return None
         message = hometask
     return message
+
+
+def mailing_hometask():
+    from bot_app.services import school_services
+    db_session = create_session()
+    students = db_session.query(Student).filter(Student.daily_hometask).all()
+    params = {
+        'access_token': VK_APIKEY,
+    }
+
+    logger.info(f'Mailing started. Number of students: {len(students)}')
+
+    for student in students:
+        student.last_mailing = datetime.datetime.now()
+        date = datetime.datetime.now() + datetime.timedelta(hours=16)
+        hometask = school_services.get_hometask(student.vk_id, date)
+        params['user_id'] = student.vk_id
+        params['random_id'] = random.randint(1, 2 ** 32)
+        message = format_hometask(hometask, date, handle_errors=False)
+        if message is None:
+            continue
+        params['message'] = message
+        VK_API.messages.send(**params)
+
+    logger.info('Mailing successful')
