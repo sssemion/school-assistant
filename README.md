@@ -5,8 +5,7 @@ An assistant you won't forget about homework
 
 _There will be the description of the project soon_
 
-version 0.2.4  
-This version of the bot can only send you homework if you will ask it to  
+version 1.0.0
 
 ## Project structure  
 
@@ -19,7 +18,6 @@ This version of the bot can only send you homework if you will ask it to
 `│   │   ├── __all_models.py`  
 `│   │   ├── api_session.py`  
 `│   │   ├── db_session.py`  
-`│   │   ├── mark.py`  
 `│   │   ├── student.py`  
 `│   │   └── subject.py`  
 `│   ├── db*`  
