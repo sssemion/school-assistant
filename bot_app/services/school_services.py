@@ -47,7 +47,7 @@ def register(vk_id, form: RegisterForm) -> bool:
                              expires=datetime.datetime.now() + datetime.timedelta(hours=1))
     db_session.add(api_session)
     db_session.commit()
-    vk_services.config_daily_hometask(vk_id)
+    vk_services.config_mailing(vk_id)
     return True
 
 

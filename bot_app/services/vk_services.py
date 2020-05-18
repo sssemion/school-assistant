@@ -5,6 +5,7 @@ import random
 import pymorphy2
 import vk
 
+from bot_app import logger
 from bot_app.bot_config import *
 from bot_app.data.db_session import create_session
 from bot_app.data.student import Student
@@ -12,10 +13,12 @@ from bot_app.data.student import Student
 VK_SESSION = vk.Session()
 VK_API = vk.API(VK_SESSION, v=5.103)
 
-DAILY_HOMETASK = 'daily_hometask'
-MAILING_TIME = 'mailing_time'
-NEW_MARKS = 'new_marks'
-DEBTS_ALERTS = 'debts_alerts'
+MAILING = 'mailing'
+UNSUBSCRIBE = 'Отписаться от всех рассылок'
+
+DATE_FORMATS = ["%Y-%m-%d", "%y-%m-%d",
+                "%d.%m.%Y", "%d.%m.%y",
+                "%m-%d", "%d.%m"]
 
 WEEKDAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 
@@ -30,24 +33,10 @@ MAIN_KEYBOARD = json.dumps({
             },
             'color': 'primary'
         }],
-        [
-            {
-                'action': {
-                    'type': 'text',
-                    'label': 'Оценки'
-                }
-            },
-            {
-                'action': {
-                    'type': 'text',
-                    'label': 'Статистика'
-                }
-            }
-        ],
         [{
             'action': {
                 'type': 'text',
-                'label': 'Отписаться от всех рассылок'
+                'label': UNSUBSCRIBE
             },
             'color': 'negative'
         }]
@@ -67,17 +56,10 @@ def handle_message(data):  # main function that receives and handle each message
     else:
         new_user = False
 
-
     if new_user:
         return start(data)
-    if student.dialogue_point == DAILY_HOMETASK:
-        config_daily_hometask(vk_id, text)
-    elif student.dialogue_point == MAILING_TIME:
-        config_mailing_time(vk_id, text)
-    elif student.dialogue_point == NEW_MARKS:
-        config_new_marks(vk_id, text)
-    elif student.dialogue_point == DEBTS_ALERTS:
-        config_debts_alerts(vk_id, text)
+    if student.dialogue_point == MAILING:
+        config_mailing(vk_id, text)
     elif student.dialogue_point == 'main':
         main_point(data)
 
@@ -111,19 +93,17 @@ def start(data):
     return VK_API.messages.send(**params)
 
 
-def config_daily_hometask(vk_id, response=None):
+def config_mailing(vk_id, response=None):
     db_session = create_session()
     student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
     if response == 'Да':
-        student.dialogue_point = 'daily_hometask_yes'
         student.daily_hometask = True
         db_session.commit()
-        return config_mailing_time(vk_id)
+        return end_config(vk_id)
     elif response == 'Нет':
-        student.dialogue_point = 'daily_hometask_no'
         student.daily_hometask = False
         db_session.commit()
-        return config_new_marks(vk_id)
+        return end_config(vk_id)
     else:
         params = {
             'user_id': vk_id,
@@ -155,139 +135,9 @@ def config_daily_hometask(vk_id, response=None):
                                 'хочешь получать ежедневные уведомления с домашним заданием?'
         else:
             params['message'] = 'Просто нажми на кнопку Да/Нет'
-        student.dialogue_point = DAILY_HOMETASK
+        student.dialogue_point = 'mailing'
         db_session.commit()
         return VK_API.messages.send(**params)
-
-
-def config_mailing_time(vk_id, response=None):
-    db_session = create_session()
-    student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
-    if response:
-        try:
-            hh, mm = map(int, response.split(':'))
-            student.mailing_time = datetime.time(hour=hh, minute=mm)
-            student.dialogue_point = MAILING_TIME + '_done'
-            db_session.commit()
-            return config_new_marks(vk_id)
-        except ValueError:
-            params = {
-                'user_id': vk_id,
-                'random_id': random.randint(1, 2 ** 32),
-                'message': 'Некорректный формат!',
-                'access_token': VK_APIKEY
-            }
-            return VK_API.messages.send(**params)
-
-    else:
-        params = {
-            'user_id': vk_id,
-            'random_id': random.randint(1, 2 ** 32),
-            'message': 'Тогда выбери время (в формате чч:мм), в которое хочешь получать сообщения',
-            'access_token': VK_APIKEY,
-        }
-        student.dialogue_point = MAILING_TIME
-        db_session.commit()
-        return VK_API.messages.send(**params)
-
-
-def config_new_marks(vk_id, response=None):
-    db_session = create_session()
-    student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
-    if response == 'Давай':
-        student.dialogue_point = NEW_MARKS + '_yes'
-        student.new_marks_alerts = True
-    elif response == 'Не':
-        student.dialogue_point = NEW_MARKS + '_no'
-        student.new_marks_alerts = False
-    else:
-        params = {
-            'user_id': vk_id,
-            'random_id': random.randint(1, 2 ** 32),
-            'keyboard': json.dumps({
-                'inline': False,
-                'one_time': True,
-                'buttons': [[
-                    {
-                        'action': {
-                            'type': 'text',
-                            'label': 'Давай'
-                        },
-                        'color': 'positive'
-                    },
-                    {
-                        'action': {
-                            'type': 'text',
-                            'label': 'Не'
-                        },
-                        'color': 'negative'
-                    }
-                ]]
-            }),
-            'access_token': VK_APIKEY,
-        }
-        if response is None:
-            params['message'] = 'Идем дальше. Как насчет уведомлений о новых оценках?'
-        else:
-            params['message'] = 'Просто нажми на кнопку Давай/Не'
-        student.dialogue_point = NEW_MARKS
-        db_session.commit()
-        return VK_API.messages.send(**params)
-    db_session.commit()
-    return config_debts_alerts(vk_id)
-
-
-def config_debts_alerts(vk_id, response=None):
-    db_session = create_session()
-    student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
-    if response == 'Да':
-        student.dialogue_point = DEBTS_ALERTS + '_yes'
-        student.debts_alerts = True
-    elif response == 'Нет':
-        student.dialogue_point = DEBTS_ALERTS + '_no'
-        student.debts_alerts = False
-    else:
-        params = {
-            'user_id': vk_id,
-            'random_id': random.randint(1, 2 ** 32),
-            'keyboard': json.dumps({
-                'inline': False,
-                'one_time': True,
-                'buttons': [[
-                    {
-                        'action': {
-                            'type': 'text',
-                            'label': 'Да'
-                        },
-                        'color': 'positive'
-                    },
-                    {
-                        'action': {
-                            'type': 'text',
-                            'label': 'Нет'
-                        },
-                        'color': 'negative'
-                    }
-                ]]
-            }),
-            'access_token': VK_APIKEY,
-        }
-        if response is None:
-            params['message'] = 'Последний шаг. Хочешь получать сообщения о неисправленных долгах?'
-        else:
-            params['message'] = 'Просто нажми на кнопку Да/Нет'
-        student.dialogue_point = DEBTS_ALERTS
-        db_session.commit()
-        return VK_API.messages.send(**params)
-    db_session.commit()
-    return end_config(vk_id)
-
-
-def main_point(vk_id, response=None):
-    db_session = create_session()
-    student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
-    if response is None:
-        pass
 
 
 def end_config(vk_id):
@@ -317,20 +167,62 @@ def main_point(data):
         'random_id': random.randint(1, 2 ** 32),
         'access_token': VK_APIKEY,
     }
+
     if text == 'Домашка на завтра':
         date = datetime.datetime.now() + datetime.timedelta(hours=16)
-        formatted_date = '.'.join(str(date.date()).split('-')[::-1])
         hometask = school_services.get_hometask(vk_id, date)
-        if hometask is None:
-            params['message'] = 'Произошла какая-то ошибка. Попробуйте позже'
-        elif type(hometask) == dict:
-            morph = pymorphy2.MorphAnalyzer()
-            weekday = morph.parse(WEEKDAYS[date.weekday()])[0].inflect({'accs', 'sing'}).word
-            params['message'] = f'Домашка на {weekday}, {formatted_date}\n'
-            for subject, task in hometask.items():
-                params['message'] += f'\n ✼ {subject}:\n{task}\n'
-        elif type(hometask) == str:
-            params['message'] = hometask
+        params['message'] = format_hometask(hometask, date)
+
+    elif text.startswith('Домашка на') or text.startswith("Дз на"):
+        date = parse_date(text.split(' ')[-1])
+        if date is None:
+            params['message'] = 'Сори, не могу распознать дату. Попробуй другой формат'
+        else:
+            hometask = school_services.get_hometask(vk_id, date)
+            params['message'] = format_hometask(hometask, date)
+
+    elif text == UNSUBSCRIBE:
+        db_session = create_session()
+        student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
+        student.daily_hometask = False
+        params['message'] = 'Лааадно'
+
     else:
         params['message'] = 'Ага'
+
     return VK_API.messages.send(**params)
+
+
+def parse_date(datestr):
+    logger.debug(f'Got datestr "{datestr}"')
+    for date_format in DATE_FORMATS:
+        # Перебираем различные форматы даты
+        try:
+            # Пробуем преобразовать дату
+            date = datetime.datetime.strptime(datestr, date_format)
+            date = date.replace(year=datetime.date.today().year)
+            logger.debug(f'Success: {date!r}')
+            # Если получилось, возвращаем ее
+            return date
+        except (TypeError, ValueError):
+            # Иначе, пробуем другие форматы
+            pass
+    # И если ни один не подошел, возвращаем None
+    logger.debug('Date doesn\'t match any format')
+    return None
+
+
+def format_hometask(hometask, date):
+    formatted_date = '.'.join(str(date.date()).split('-')[::-1])
+    message = ''
+    if hometask is None:
+        message = 'Произошла какая-то ошибка. Попробуй позже'
+    elif type(hometask) == dict:
+        morph = pymorphy2.MorphAnalyzer()
+        weekday = morph.parse(WEEKDAYS[date.weekday()])[0].inflect({'accs', 'sing'}).word
+        message = f'Домашка на {weekday}, {formatted_date}\n'
+        for subject, task in hometask.items():
+            message += f'\n • {subject}:\n{task}\n'
+    elif type(hometask) == str:
+        message = hometask
+    return message
