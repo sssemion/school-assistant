@@ -3,6 +3,7 @@ import sqlalchemy
 from sqlalchemy import orm
 from bot_app.data.db_session import SqlAlchemyBase
 
+
 class Student(SqlAlchemyBase):
     __tablename__ = 'students'
 
@@ -12,12 +13,12 @@ class Student(SqlAlchemyBase):
     login_data = sqlalchemy.Column(sqlalchemy.String)
     dialogue_point = sqlalchemy.Column(sqlalchemy.String)
     daily_hometask = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-    mailing_time = sqlalchemy.Column(sqlalchemy.Time)
-    new_marks_alerts = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
-    debts_alerts = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    last_mailing = sqlalchemy.Column(sqlalchemy.DateTime)
 
-    marks = orm.relation('Mark', back_populates='student', lazy='subquery')
     sessions = orm.relation('ApiSession', back_populates='student', lazy='subquery')
 
     def __repr__(self):
         return f"<Student> id:{self.id} vk:{self.vk_id}"
+
+    def __eq__(self, other):
+        return self.id == other.id
