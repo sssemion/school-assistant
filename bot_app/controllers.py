@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request, render_template
+from flask import request, render_template, jsonify
 from werkzeug.exceptions import abort
 
 from bot_app import app, logger
@@ -76,3 +76,4 @@ def start_mailing():
 
     LAST_MAILING = datetime.datetime.now()
     vk_services.mailing_hometask()
+    return jsonify({'success': True})
