@@ -86,6 +86,43 @@ def get_hometask(vk_id, date):
     return ans
 
 
+def get_marks(vk_id, date):
+    db_session = create_session()
+    student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
+    for api_session in student.sessions:
+        if api_session.expires < datetime.datetime.now():
+            db_session.delete(api_session)
+        else:  # Если нашли действующую сессию
+            break
+    else:  # И если не нашли
+        api_session = create_api_session(student)
+        if api_session is None:
+            return None
+    db_session.commit()
+    headers = {'Cookie': f'sessionid={api_session.session_id}'}
+    date = '.'.join(str(date.date()).split('-')[::-1])
+    params = {'pupil_id': student.school_id, 'from_date': date, 'to_date': date}
+    r = requests.get('http://school.72to.ru/rest/diary', params=params, headers=headers)
+    response = r.json()
+    try:
+        lessons = response['days'][0][1]['lessons']
+    except KeyError:
+        return 'На выбранную дату уроков не найдено'
+    ans = {}
+    for lesson in lessons:
+        if lesson['homework'] and lesson['homework'].lower() not in \
+                ['не предусмотрено', 'не предусмотрено; не предусмотрено']:
+            marks = list(filter(lambda x: x, map(lambda x: ' '.join(x[2]), lesson['marks'])))
+            if marks:
+                ans[lesson['discipline']] = ' / '.join(marks)
+        if (lesson['discipline'],) not in db_session.query(Subject.name).all():
+            db_session.add(Subject(name=lesson['discipline']))
+            db_session.commit()
+    if ans == {}:
+        return 'На выбранную дату нет оценок'
+    return ans
+
+
 def create_api_session(student: Student):
     login, password = decrypt_logindata(student.login_data)
     params = {

@@ -15,6 +15,8 @@ VK_API = vk.API(VK_SESSION, v=5.103)
 
 MAILING = 'mailing'
 UNSUBSCRIBE = 'Отписаться от всех рассылок'
+HT_FOR_TOMORROW = 'Домашка на завтра'
+MARKS_FOR_TODAY = 'Оценки за сегодня'
 
 DATE_FORMATS = ["%Y-%m-%d", "%y-%m-%d",
                 "%d.%m.%Y", "%d.%m.%y",
@@ -26,13 +28,22 @@ MAIN_KEYBOARD = json.dumps({
     'inline': False,
     'one_time': False,
     'buttons': [
-        [{
-            'action': {
-                'type': 'text',
-                'label': 'Домашка на завтра'
+        [
+            {
+                'action': {
+                    'type': 'text',
+                    'label': HT_FOR_TOMORROW
+                },
+                'color': 'primary'
             },
-            'color': 'primary'
-        }],
+            {
+                'action': {
+                    'type': 'text',
+                    'label': MARKS_FOR_TODAY
+                },
+                'color': 'primary',
+            }
+        ],
         [{
             'action': {
                 'type': 'text',
@@ -166,9 +177,10 @@ def main_point(data):
         'user_id': vk_id,
         'random_id': random.randint(1, 2 ** 32),
         'access_token': VK_APIKEY,
+        'keyboard': MAIN_KEYBOARD
     }
 
-    if text == 'Домашка на завтра':
+    if text == HT_FOR_TOMORROW:
         date = datetime.datetime.now() + datetime.timedelta(hours=16)
         hometask = school_services.get_hometask(vk_id, date)
         params['message'] = format_hometask(hometask, date)
@@ -180,6 +192,19 @@ def main_point(data):
         else:
             hometask = school_services.get_hometask(vk_id, date)
             params['message'] = format_hometask(hometask, date)
+
+    elif text == MARKS_FOR_TODAY:
+        date = datetime.datetime.now()
+        marks = school_services.get_marks(vk_id, date)
+        params['message'] = format_marks(marks, date)
+
+    elif text.startswith('Оценки за'):
+        date = parse_date(text.split(' ')[-1])
+        if date is None:
+            params['message'] = 'Сори, не могу распознать дату. Попробуй другой формат'
+        else:
+            marks = school_services.get_marks(vk_id, date)
+            params['message'] = format_marks(marks, date)
 
     elif text == UNSUBSCRIBE:
         db_session = create_session()
@@ -229,6 +254,26 @@ def format_hometask(hometask, date, handle_errors=True):
         if not handle_errors:
             return None
         message = hometask
+    return message
+
+
+def format_marks(marks, date, handle_errors=True):
+    formatted_date = '.'.join(str(date.date()).split('-')[::-1])
+    message = ''
+    if marks is None:
+        if not handle_errors:
+            return None
+        message = 'Произошла какая-то ошибка. Попробуй позже'
+    elif type(marks) == dict:
+        morph = pymorphy2.MorphAnalyzer()
+        weekday = morph.parse(WEEKDAYS[date.weekday()])[0].inflect({'accs', 'sing'}).word
+        message = f'Оценки за {weekday}, {formatted_date}\n'
+        for subject, marks in marks.items():
+            message += f'• {subject}: {marks}\n'
+    elif type(marks) == str:
+        if not handle_errors:
+            return None
+        message = marks
     return message
 
 
