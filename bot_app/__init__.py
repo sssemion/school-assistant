@@ -37,17 +37,3 @@ logger.addHandler(debug_handler)
 db_session.global_init("bot_app/db/school_assistant.sqlite")
 
 from bot_app import controllers
-# from bot_app.services import vk_services
-#
-#
-# def mailing():
-#     print(*threading.enumerate())
-#     import schedule
-#     schedule.every().day.at("16:00").do(vk_services.mailing_hometask)
-#
-#     while True:
-#         schedule.run_pending()
-#
-#
-# scheduleThread = threading.Thread(target=mailing, name='ScheduleThread')
-# scheduleThread.start()
