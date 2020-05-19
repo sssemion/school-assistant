@@ -50,6 +50,13 @@ MAIN_KEYBOARD = json.dumps({
                 'label': UNSUBSCRIBE
             },
             'color': 'negative'
+        }],
+        [{
+            'action': {
+                'type': 'text',
+                'label': 'Помощь'
+            },
+            'color': 'positive'
         }]
     ]
 })
@@ -205,6 +212,13 @@ def main_point(data):
         else:
             marks = school_services.get_marks(vk_id, date)
             params['message'] = format_marks(marks, date)
+
+    elif text == 'Помощь':
+        params['message'] = '''Основные команды:
+"Домашка на завтра" - домашка на завтра;
+"Оценки за сегодня" - оценки за сегодня;
+"Домашка на <дата в формате дд.мм или дд.мм.гг>" - домашка на конкретный день;
+"Оценки за <дата в формате дд.мм или дд.мм.гг>" - оценки за конкретный день;'''
 
     elif text == UNSUBSCRIBE:
         db_session = create_session()
