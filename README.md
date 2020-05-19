@@ -5,7 +5,7 @@ An assistant you won't forget about homework
 
 _There will be the description of the project soon_
 
-version 1.1.0
+version 1.1.1
 
 ## Project structure  
 
