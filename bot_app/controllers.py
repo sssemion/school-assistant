@@ -1,4 +1,6 @@
-from flask import request, render_template
+import datetime
+
+from flask import request, render_template, jsonify
 from werkzeug.exceptions import abort
 
 from bot_app import app, logger
@@ -35,9 +37,11 @@ def register(vk_id):
     from bot_app.data.student import Student
     session = create_session()
     if session.query(Student).filter(Student.vk_id == vk_id).first() is None or \
-            session.query(Student).filter(Student.vk_id == vk_id).first().dialogue_point != 'register':
+            session.query(Student).filter(
+                Student.vk_id == vk_id).first().dialogue_point != 'register':
         try:
-            logger.error(f"Registered user: {vk_id}. DP = {session.query(Student).filter(Student.vk_id == vk_id).first().dialogue_point}")
+            logger.error(
+                f"Registered user: {vk_id}. DP = {session.query(Student).filter(Student.vk_id == vk_id).first().dialogue_point}")
         except AttributeError:
             logger.error(f"Unrecognized user: {vk_id}")
         abort(404)
@@ -49,3 +53,27 @@ def register(vk_id):
                                                        'Электронной школы! Пожалуйста, следуйте '
                                                        'инструкциям бота')
     return render_template('register.html', form=form)
+
+
+LAST_MAILING = None
+
+
+@app.route('/vk/start_mailing', methods=['POST'])
+def start_mailing():
+    request_json = request.get_json()
+
+    # Для защиты от сторонних запросов
+    if request_json.get('key') != MAILING_KEY:
+        logger.warning('Incorrect Mailing_key')
+        abort(403)
+
+    # Для защиты от повторных запросов
+    global LAST_MAILING
+    if LAST_MAILING is not None and \
+            datetime.datetime.now() - LAST_MAILING < datetime.timedelta(hours=23, minutes=59):
+        logger.warning('Mailing is not scheduled')
+        abort(400)
+
+    LAST_MAILING = datetime.datetime.now()
+    vk_services.mailing_hometask()
+    return jsonify({'success': True})
