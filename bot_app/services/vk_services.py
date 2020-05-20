@@ -224,6 +224,7 @@ def main_point(data):
         db_session = create_session()
         student = db_session.query(Student).filter(Student.vk_id == vk_id).first()
         student.daily_hometask = False
+        db_session.commit()
         params['message'] = 'Лааадно'
 
     else:
