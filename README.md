@@ -1,9 +1,7 @@
 # school-assistant
-An assistant you won't forget about homework
+A chat-bot that won't let you forget about homework
 
 [Software requirements specification](https://docs.google.com/document/d/10-2b0d08dBXfpZ8_FU2gTfRhVtiyUkso0O42UgCanHc/edit?usp=sharing)
-
-_There will be the description of the project soon_
 
 ## Project structure  
 
